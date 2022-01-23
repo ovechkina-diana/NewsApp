@@ -7,10 +7,10 @@
 
 import Foundation
 
-struct Article: Codable {
-    let status: String
-    let articles: [New]
-}
+//struct Article: Codable {
+//    let status: String
+//    let articles: [New]
+//}
 
 
 struct New: Codable {
@@ -29,6 +29,33 @@ struct New: Codable {
         Content: \(content)
         """
     }
+    
+    init(newData: [String: Any]) {
+        author = newData["author"] as? String ?? ""
+        title = newData["title"] as? String ?? ""
+        description = newData["description"] as? String ?? ""
+        url = newData["url"] as? String ?? ""
+        urlToImage = newData["urlToImage"] as? String ?? ""
+        content = newData["content"] as? String ?? ""
+    }
+    
+    static func getNews(from value: Any) -> [New] {
+        guard let articleData = value as? [String:Any] else { return [] }
+        guard let newsData = articleData["articles"] as? [[String: Any]] else { return [] }
+        
+        return newsData.map {New(newData: $0)}
+    }
+    
+//    static func getNews(from value: Any) -> [New] {
+//        guard let articleData = value as? [String:Any] else { return [] }
+//        guard let newsData = articleData["articles"] as? [[String: Any]] else { return [] }
+//        var allNews = [New]()
+//        for newData in newsData {
+//            let new = New(newData: newData)
+//            allNews.append(new)
+//        }
+//        return allNews
+//    }
 }
 
 enum Link: String {

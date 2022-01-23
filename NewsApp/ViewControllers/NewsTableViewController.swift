@@ -6,10 +6,11 @@
 //
 
 import UIKit
+import Alamofire
 
 class NewsTableViewController: UITableViewController {
     
-    var article: Article?
+   // var article: Article?
     private var allNews: [New] = []
     private var searchController = UISearchController(searchResultsController: nil)
     private var filteredNews: [New] = []
@@ -25,43 +26,24 @@ class NewsTableViewController: UITableViewController {
         super.viewDidLoad()
 
         setupSearchController()
-        fetchData(from: Link.NewsApi.rawValue)
+      //  fetchData(from: Link.NewsApi.rawValue)
+        alamofireGet()
     }
 
     // MARK: - Table view data source
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-       // isFiltering ? filteredNews.count : allNews.count
-       isFiltering ? filteredNews.count : article?.articles.count ?? 0
+        isFiltering ? filteredNews.count : allNews.count
+      // isFiltering ? filteredNews.count : article?.articles.count ?? 0
     }
 
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        
         var content = cell.defaultContentConfiguration()
-        
-//      let url = Link.NewsApi.rawValue
-//      let new = isFiltering ? filteredNews[indexPath.row] : allNews[indexPath.row]
-        
-        let new = isFiltering ? filteredNews[indexPath.row] : article?.articles[indexPath.row]
-
+        let new = isFiltering ? filteredNews[indexPath.row] : allNews[indexPath.row]
     
-//        NetworkManager.shared.fetchData(from: url) { result in
-//            switch result {
-//            case .success(let new):
-//                self.allNews.append(new)
-//                content.text = new.title
-//                cell.contentConfiguration = content
-//            case .failure(let error):
-//                print(error)
-//            }
-//        }
-        
-        content.text = new?.title
-
-        
-       // content.text = new.title
+        content.text = new.title
         cell.contentConfiguration = content
         
         return cell
@@ -71,8 +53,8 @@ class NewsTableViewController: UITableViewController {
     // MARK: - Navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         guard let indexPath = tableView.indexPathForSelectedRow else { return }
-       let new = isFiltering ? filteredNews[indexPath.row] : article?.articles[indexPath.row]
-     //   let new = isFiltering ? filteredNews[indexPath.row] : allNews[indexPath.row]
+   //    let new = isFiltering ? filteredNews[indexPath.row] : article?.articles[indexPath.row]
+        let new = isFiltering ? filteredNews[indexPath.row] : allNews[indexPath.row]
         guard let detailVC = segue.destination as? NewDetailsViewController else { return }
         detailVC.newInfo = new
     }
@@ -87,12 +69,24 @@ class NewsTableViewController: UITableViewController {
         definesPresentationContext = true
     }
     
-    private func fetchData(from url: String) {
-        NetworkManager.shared.fetchData(from: url) { new in
-            self.article = new
-            self.tableView.reloadData()
-        }
-    }
+//    private func fetchData(from url: String) {
+//        NetworkManager.shared.fetchData(from: url) { new in
+//            self.article = new
+//            self.tableView.reloadData()
+//        }
+//    }
+    
+//    private func fetchData(from url: String) {
+//        NetworkManager.shared.fetchData(from: url) {result in
+//            switch result {
+//            case .success(let new):
+//                self.article = new
+//            case .failure(let error):
+//                print(error)
+//            }
+//
+//        }
+//    }
 
 }
 
@@ -103,13 +97,30 @@ extension NewsTableViewController: UISearchResultsUpdating {
     }
     
     private func filterContentForSearchText(_ searchText: String) {
-        filteredNews = article?.articles.filter { new in
-            new.title.lowercased().contains(searchText.lowercased())
-        } ?? []
-//        filteredNews = allNews.filter { new in
+//        filteredNews = article?.articles.filter { new in
 //            new.title.lowercased().contains(searchText.lowercased())
-//        }
+//        } ?? []
+        filteredNews = allNews.filter { new in
+            new.title.lowercased().contains(searchText.lowercased())
+        }
         tableView.reloadData()
     }
     
+}
+
+// MARK: - Alamofire
+
+extension NewsTableViewController {
+    
+    func alamofireGet() {
+        NetworkManager.shared.fetchDataWithAlomafirefrom(url: Link.NewsApi.rawValue) { result in
+            switch result {
+            case .success(let new):
+                self.allNews = new
+                self.tableView.reloadData()
+            case .failure(let error):
+                print(error)
+            }
+        }
+    }
 }
